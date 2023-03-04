@@ -32,9 +32,9 @@ def generate():
     payload = request.get_json()
     try:
         prompt = payload["prompt"]
-        max_gen_len = int(payload["max_gen_len"])
+        max_gen_len = int(payload["maxGenTokens"])
         temp = float(payload["temp"])
-        top_p = float(payload["top_p"])
+        top_p = float(payload["topP"])
     except (KeyError, ValueError) as e:
         return { "error": repr(e) }, 400
 

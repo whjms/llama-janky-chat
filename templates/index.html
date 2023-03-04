@@ -21,6 +21,24 @@
             <textarea class="form-control" id="prompt"></textarea>
         </div>
 
+        <h2>Extra options</h2>
+        <div class="input-group mb-5">
+            <div class="container mb-2">
+                <label for="max-gen-tokens" class="form-label">Number of tokens to generate</label>
+                <input type="number" class="form-control" id="max-gen-tokens" value="200" min="1" max="2048">
+            </div>
+
+            <div class="container mb-2">
+                <label for="temperature" class="form-label">Temperature</label>
+                <input type="number" class="form-control" id="temperature" value="0.8" min="0" max="1" step="0.1">
+            </div>
+
+            <div class="container">
+                <label for="top-p" class="form-label">Top-P</label>
+                <input type="number" class="form-control" id="top-p" value="0.95" max="1" min="0" step="0.1">
+            </div>
+        </div>
+
         <h2>Generated text</h2>
         <div class="alert alert-warning" role="alert" style="display: none;">
         </div>
@@ -60,12 +78,12 @@
             });
         }
 
-        async function generate(prompt) {
+        async function generate(prompt, maxGenTokens, temp, topP) {
             const body = JSON.stringify({
                 prompt,
-                max_gen_len: 120,
-                temp: 0.9,
-                top_p: 0.95
+                maxGenTokens,
+                temp,
+                topP,
             });
 
             const response = await fetch("/generate", {
@@ -89,7 +107,10 @@
             disableInputs(true);
 
             try {
-                await generate(promptInput.value);
+                const maxGenTokens = parseInt(document.querySelector("#max-gen-tokens").value);
+                const temp = parseFloat(document.querySelector("#temperature").value);
+                const topP = parseFloat(document.querySelector("#top-p").value);
+                await generate(promptInput.value, maxGenTokens, temp, topP);
             } catch (e) {
                 alert.innerText = `ERROR: ${e}`;
                 alert.style.display = "block";
