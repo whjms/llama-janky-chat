@@ -1,6 +1,7 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the GNU General Public License version 3.
 
+from pathlib import Path
 from typing import Tuple
 import os
 import sys
@@ -9,14 +10,9 @@ import fire
 import time
 import json
 
-from pathlib import Path
-
 from fairscale.nn.model_parallel.initialize import initialize_model_parallel
 
 from llama import ModelArgs, Transformer, Tokenizer, LLaMA
-
-
-MAX_SEQ_LEN=2048
 
 def setup_model_parallel() -> Tuple[int, int]:
     local_rank = int(os.environ.get("LOCAL_RANK", -1))
