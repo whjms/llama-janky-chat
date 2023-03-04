@@ -6,9 +6,10 @@ This is a **non-production ready** frontend for [LLaMA-7B](https://github.com/fa
 
 ## Requirements
 
-- Linux (not sure if this works on Windows)
+- Linux
+- Cuda toolkit installed (supported versions up to 12.0.1 but *not* 12.1.x)
 - Python 3.10+, pip
-- NVidia (?) GPU with 16GB+ of VRAM
+- NVidia GPU with 10GB+ of VRAM (8-bit inference courtesy of https://github.com/tloen/llama-int8)
 
 ## Setup
 
