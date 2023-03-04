@@ -16,6 +16,8 @@ from fairscale.nn.model_parallel.initialize import initialize_model_parallel
 from llama import ModelArgs, Transformer, Tokenizer, LLaMA
 
 
+MAX_SEQ_LEN=2048
+
 def setup_model_parallel() -> Tuple[int, int]:
     local_rank = int(os.environ.get("LOCAL_RANK", -1))
     world_size = int(os.environ.get("WORLD_SIZE", -1))
@@ -29,7 +31,7 @@ def setup_model_parallel() -> Tuple[int, int]:
     return local_rank, world_size
 
 
-def load(ckpt_dir: str, tokenizer_path: str, local_rank: int, world_size: int) -> LLaMA:
+def load(ckpt_dir: str, tokenizer_path: str, local_rank: int, world_size: int, max_seq_len: int) -> LLaMA:
     start_time = time.time()
     checkpoints = sorted(Path(ckpt_dir).glob("*.pth"))
     assert (
@@ -41,7 +43,7 @@ def load(ckpt_dir: str, tokenizer_path: str, local_rank: int, world_size: int) -
     with open(Path(ckpt_dir) / "params.json", "r") as f:
         params = json.loads(f.read())
 
-    model_args: ModelArgs = ModelArgs(max_seq_len=2048, max_batch_size=1, **params)
+    model_args: ModelArgs = ModelArgs(max_seq_len=max_seq_len, max_batch_size=1, **params)
     tokenizer = Tokenizer(model_path=tokenizer_path)
     model_args.vocab_size = tokenizer.n_words
     torch.set_default_tensor_type(torch.cuda.HalfTensor)
@@ -53,28 +55,12 @@ def load(ckpt_dir: str, tokenizer_path: str, local_rank: int, world_size: int) -
     print(f"Loaded in {time.time() - start_time:.2f} seconds")
     return generator
 
-
-def main(ckpt_dir: str = "7B", tokenizer_path: str = "tokenizer.model", temperature: float = 0.8, top_p: float = 0.95):
+def get_generator(ckpt_dir: str, tokenizer_path: str, max_seq_len: int):
+    import os
+    os.environ["RANK"] = "0"
+    os.environ["WORLD_SIZE"] = "1"
+    os.environ["MASTER_ADDR"] = "0.0.0.0"
+    os.environ["MASTER_PORT"] = "0"
     local_rank, world_size = setup_model_parallel()
-    if local_rank > 0:
-        sys.stdout = open(os.devnull, 'w')
-
-    generator = load(ckpt_dir, tokenizer_path, local_rank, world_size)
-    prompts = ["The capital of Germany is the city of"]
-
-    def on_gen(decoded: str):
-        print(decoded)
-
-    results = generator.generate(prompts,
-        max_gen_len=256,
-        temperature=temperature,
-        top_p=top_p,
-        gen_callback=on_gen)
-
-    for result in results:
-        print(result)
-        print("\n==================================\n")
-
-
-if __name__ == "__main__":
-    fire.Fire(main)
+    generator = load(ckpt_dir, tokenizer_path, local_rank, world_size, max_seq_len)
+    return generator
