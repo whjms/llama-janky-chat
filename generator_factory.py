@@ -53,6 +53,8 @@ def load(ckpt_dir: str, tokenizer_path: str, local_rank: int, world_size: int, m
 
 def get_generator(ckpt_dir: str, tokenizer_path: str, max_seq_len: int):
     import os
+    # I have no idea how torch.distributed works, but running a task with > 1 worker
+    # from flask hangs the app, so 7B only
     os.environ["RANK"] = "0"
     os.environ["WORLD_SIZE"] = "1"
     os.environ["MASTER_ADDR"] = "0.0.0.0"
