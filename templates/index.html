@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>LLaMA 7B</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/static/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container p-3">
+        <h1 class="mb-3">LLaMA 7B</h1>
+        <label class="form-label" for="prompt">Enter a prompt:</label>
+
+        <div class="input-group mb-5">
+            <button type="button" class="btn btn-primary input-group-text">Generate</button>
+            <textarea class="form-control" id="prompt"></textarea>
+        </div>
+
+        <h2>Generated text</h2>
+        <div class="alert alert-warning" role="alert" style="display: none;">
+        </div>
+        <div id="generated"></div>
+    </div>
+
+    <script src="/static/bootstrap.bundle.min.js"></script>
+    <script>
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.querySelector("html").setAttribute("data-bs-theme", "dark");
+        }
+
+        const buttonGenerate = document.querySelector("button");
+        const promptInput = document.querySelector("textarea");
+        const generatedContainer = document.querySelector("#generated");
+        const alert = document.querySelector(".alert");
+
+        function disableInputs(disabled) {
+            buttonGenerate.setAttribute("disabled", disabled);
+            promptInput.setAttribute("disabled", disabled);
+        }
+
+        async function generate(prompt) {
+            const body = JSON.stringify({
+                prompt,
+                max_gen_len: 120,
+                temp: 0.9,
+                top_p: 0.95
+            });
+
+            const response = await fetch("/generate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body,
+            });
+
+            const generated = await response.text();
+            if (!response.ok) {
+                throw new Error(`got ${response.status} from endpoint: ${generated}`);
+            }
+
+            generatedContainer.innerHTML = '';
+            generated.split("\n").forEach(line => {
+                const p = document.createElement("p");
+                p.innerText = line;
+                generatedContainer.appendChild(p);
+            });
+        }
+
+        buttonGenerate.addEventListener("click", async () => {
+            alert.style.display = "none";
+            disableInputs(true);
+
+            try {
+                await generate(promptInput.value);
+            } catch (e) {
+                alert.innerText = `ERROR: ${e}`;
+                alert.style.display = "block";
+            } finally {
+                disableInputs(false);
+            }
+        });
+    </script>
+</body>
+
+</html>

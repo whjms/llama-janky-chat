@@ -1,6 +1,6 @@
 from logging.config import dictConfig
 import time
-from flask import Flask, request, Response
+from flask import Flask, request, Response, render_template
 
 from generator_factory import get_generator
 from message_announcer import MessageAnnouncer
@@ -54,7 +54,7 @@ def generate():
 
     sse_publisher.announce(result, "complete")
     app.logger.info("finished generation request (%.2fs): %s", time.time() - t0, payload)
-    return f'"{result}"'
+    return f'{result}'
 
 # https://maxhalford.github.io/blog/flask-sse-no-deps/
 @app.route('/listen', methods=['GET'])
@@ -66,3 +66,7 @@ def listen():
             yield msg
 
     return Response(stream(), mimetype='text/event-stream')
+
+@app.route("/")
+def index():
+    return render_template("index.html")
