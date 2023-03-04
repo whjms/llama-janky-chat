@@ -13,7 +13,11 @@
         <label class="form-label" for="prompt">Enter a prompt:</label>
 
         <div class="input-group mb-5">
-            <button type="button" class="btn btn-primary input-group-text">Generate</button>
+            <button type="button" class="btn btn-primary input-group-text">
+                <span class="spinner-border spinner-border-sm" role="status" style="display: none;"
+                    aria-hidden="true"></span>
+                Generate
+            </button>
             <textarea class="form-control" id="prompt"></textarea>
         </div>
 
@@ -30,13 +34,30 @@
         }
 
         const buttonGenerate = document.querySelector("button");
+        const spinner = document.querySelector(".spinner-border");
         const promptInput = document.querySelector("textarea");
         const generatedContainer = document.querySelector("#generated");
         const alert = document.querySelector(".alert");
 
         function disableInputs(disabled) {
-            buttonGenerate.setAttribute("disabled", disabled);
-            promptInput.setAttribute("disabled", disabled);
+            if (disabled) {
+                spinner.style.display = "inline-block";
+                buttonGenerate.setAttribute("disabled", "");
+                promptInput.setAttribute("disabled", "");
+            } else {
+                spinner.style.display = "none";
+                buttonGenerate.removeAttribute("disabled");
+                promptInput.removeAttribute("disabled");
+            }
+        }
+
+        function renderGeneratedText(text) {
+            generatedContainer.innerHTML = '';
+            text.split("\n").forEach(line => {
+                const p = document.createElement("p");
+                p.innerText = line;
+                generatedContainer.appendChild(p);
+            });
         }
 
         async function generate(prompt) {
@@ -60,12 +81,7 @@
                 throw new Error(`got ${response.status} from endpoint: ${generated}`);
             }
 
-            generatedContainer.innerHTML = '';
-            generated.split("\n").forEach(line => {
-                const p = document.createElement("p");
-                p.innerText = line;
-                generatedContainer.appendChild(p);
-            });
+            renderGeneratedText(generated);
         }
 
         buttonGenerate.addEventListener("click", async () => {
@@ -80,6 +96,17 @@
             } finally {
                 disableInputs(false);
             }
+        });
+
+        const eventSource = new EventSource("/listen");
+        eventSource.addEventListener("partial", (event) => {
+            // in case another tab/client is generating
+            disableInputs(true);
+            renderGeneratedText(JSON.parse(event.data));
+        });
+
+        eventSource.addEventListener("complete", (event) => {
+            disableInputs(false);
         });
     </script>
 </body>

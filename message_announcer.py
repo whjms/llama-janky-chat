@@ -1,4 +1,5 @@
 from logging import getLogger
+import json
 import queue
 
 logger = getLogger()
@@ -14,7 +15,7 @@ class MessageAnnouncer:
         return q
 
     def format_sse(self, data: str, event=None) -> str:
-        msg = f'data: {data}\n\n'
+        msg = f'data: {json.dumps(data)}\n\n'
         if event is not None:
             msg = f'event: {event}\n{msg}'
         return msg
