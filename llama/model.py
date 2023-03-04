@@ -1,6 +1,7 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the GNU General Public License version 3.
 
+from logging import getLogger
 from typing import Optional, Tuple
 from dataclasses import dataclass
 import math
@@ -11,6 +12,7 @@ import torch.nn.functional as F
 import bitsandbytes as bnb
 import tqdm
 
+logger = getLogger()
 
 @dataclass
 class ModelArgs:
@@ -274,7 +276,7 @@ class Transformer(nn.Module):
             k: v for k, v in self.named_modules() if isinstance(v, nn.Linear)
         }
 
-        print("Quantizing", len(linear_layers), "layers")
+        logger.info("Quantizing %d layers", len(linear_layers))
         for name, layer in tqdm.tqdm(linear_layers.items()):
             new_layer = Int8Linear(layer)
             set_layer(self, name, new_layer)

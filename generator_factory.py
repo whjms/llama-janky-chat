@@ -1,12 +1,15 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the GNU General Public License version 3.
 
+from logging import getLogger
 from pathlib import Path
 import torch
 import time
 import json
 
 from llama import ModelArgs, Transformer, Tokenizer, LLaMA
+
+logger = getLogger()
 
 # 8-bit support: https://github.com/tloen/llama-int8/tree/5e844895a05dee198194aab083c48827be899fdc
 def load(ckpt_dir: str, tokenizer_path: str, max_seq_len: int) -> LLaMA:
@@ -42,7 +45,7 @@ def load(ckpt_dir: str, tokenizer_path: str, max_seq_len: int) -> LLaMA:
 
     # load the state dict incrementally, to avoid memory problems
     for i, ckpt in enumerate(checkpoints):
-        print(f"Loading checkpoint {i}")
+        logger.info(f"Loading checkpoint {i}")
         checkpoint = torch.load(ckpt, map_location="cpu")
         for parameter_name, parameter in model.named_parameters():
             short_name = parameter_name.split(".")[-2]
@@ -63,7 +66,7 @@ def load(ckpt_dir: str, tokenizer_path: str, max_seq_len: int) -> LLaMA:
     model.quantize()
 
     generator = LLaMA(model, tokenizer)
-    print(f"Loaded in {time.time() - start_time:.2f} seconds")
+    logger.info(f"Loaded in {time.time() - start_time:.2f} seconds")
     return generator
 
 def get_generator(ckpt_dir: str, tokenizer_path: str, max_seq_len: int) -> LLaMA:
