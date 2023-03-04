@@ -12,30 +12,41 @@
         <h1 class="mb-3">LLaMA 7B</h1>
         <label class="form-label" for="prompt">Enter a prompt:</label>
 
-        <div class="input-group mb-5">
+        <div class="input-group mb-2">
             <button type="button" class="btn btn-primary input-group-text">
                 <span class="spinner-border spinner-border-sm" role="status" style="display: none;"
                     aria-hidden="true"></span>
                 Generate
             </button>
-            <textarea class="form-control" id="prompt"></textarea>
+            <textarea class="form-control" id="prompt" rows="5"></textarea>
         </div>
 
-        <h2>Extra options</h2>
-        <div class="input-group mb-5">
-            <div class="container mb-2">
-                <label for="max-gen-tokens" class="form-label">Number of tokens to generate</label>
-                <input type="number" class="form-control" id="max-gen-tokens" value="200" min="1" max="2048">
+        <div class="accordion mb-5">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#extra-options">Extra Options</button>
+                </h2>
             </div>
 
-            <div class="container mb-2">
-                <label for="temperature" class="form-label">Temperature</label>
-                <input type="number" class="form-control" id="temperature" value="0.8" min="0" max="1" step="0.1">
-            </div>
+            <div id="extra-options" class="accordion-collapse collapse hide">
+                <div class="input-group accordion-body">
+                    <div class="container mb-2">
+                        <label for="max-gen-tokens" class="form-label">Number of tokens to generate</label>
+                        <input type="number" class="form-control" id="max-gen-tokens" value="200" min="1" max="2048">
+                    </div>
 
-            <div class="container">
-                <label for="top-p" class="form-label">Top-P</label>
-                <input type="number" class="form-control" id="top-p" value="0.95" max="1" min="0" step="0.1">
+                    <div class="container mb-2">
+                        <label for="temperature" class="form-label">Temperature</label>
+                        <input type="number" class="form-control" id="temperature" value="0.8" min="0" max="1"
+                            step="0.1">
+                    </div>
+
+                    <div class="container">
+                        <label for="top-p" class="form-label">Top-P</label>
+                        <input type="number" class="form-control" id="top-p" value="0.95" max="1" min="0" step="0.1">
+                    </div>
+                </div>
             </div>
         </div>
 
