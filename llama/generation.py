@@ -1,7 +1,7 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the GNU General Public License version 3.
 
-from typing import List
+from typing import List, Callable
 
 import torch
 
@@ -20,6 +20,7 @@ class LLaMA:
         max_gen_len: int,
         temperature: float = 0.8,
         top_p: float = 0.95,
+        gen_callback: Callable[[str], None] = None
     ) -> List[str]:
         bsz = len(prompts)
         params = self.model.params
@@ -52,6 +53,16 @@ class LLaMA:
             )
             tokens[:, cur_pos] = next_token
             prev_pos = cur_pos
+
+            tokens_so_far = tokens[0].tolist()[: len(prompt_tokens[0]) + max_gen_len]
+            try:
+                tokens_so_far = tokens_so_far[: tokens_so_far.index(self.tokenizer.pad_id)]
+            except ValueError:
+                pass
+            if gen_callback:
+                # I'd like to just decode next_token, but idk how sentencepiece's decode()
+                # is adding whitespace between tokens
+                gen_callback(self.tokenizer.decode(tokens_so_far))
 
         decoded = []
         for i, t in enumerate(tokens.tolist()):

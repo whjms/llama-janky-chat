@@ -61,7 +61,15 @@ def main(ckpt_dir: str = "7B", tokenizer_path: str = "tokenizer.model", temperat
 
     generator = load(ckpt_dir, tokenizer_path, local_rank, world_size)
     prompts = ["The capital of Germany is the city of"]
-    results = generator.generate(prompts, max_gen_len=200, temperature=temperature, top_p=top_p)
+
+    def on_gen(decoded: str):
+        print(decoded)
+
+    results = generator.generate(prompts,
+        max_gen_len=256,
+        temperature=temperature,
+        top_p=top_p,
+        gen_callback=on_gen)
 
     for result in results:
         print(result)
