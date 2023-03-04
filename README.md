@@ -23,9 +23,10 @@ This is a **non-production ready** frontend for [LLaMA-7B](https://github.com/fa
 
 ## Configuration
 
-The checkpoint folder and tokenizer file can be configured with environment variables.
+The checkpoint folder, tokenizer file, and other options can be configured with environment variables.
 
 | Variable     | Description     | Default value |
 |--------------|-----------|------------|
 | CHECKPOINT_DIR | Path of 7B checkpoint folder      | `7B`        |
 | TOKENIZER_PATH      | Path of tokenizer model  | `tokenizer.model`       |
+| CONTEXT_LEN | Number of context tokens to provide to model. Reduce if you get cuBLAS or memory errors.  | `768` |

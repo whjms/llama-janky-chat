@@ -24,20 +24,19 @@ dictConfig({
 })
 
 def load_generator():
-    MAX_CONTEXT = 2048
     def env_var_with_default(name: str, default: str) -> str:
         try:
             return os.environ[name]
-        except ValueError:
+        except KeyError:
             return default
 
     checkpoint_dir = env_var_with_default("CHECKPOINT_DIR", "7B")
     tokenizer_path = env_var_with_default("TOKENIZER_PATH", "tokenizer.model")
-    return get_generator(checkpoint_dir, tokenizer_path, MAX_CONTEXT)
+    max_context = int(env_var_with_default("CONTEXT_LEN", 768))
+    return get_generator(checkpoint_dir, tokenizer_path, max_context), max_context
 
-MAX_CONTEXT = 2048
 generation_lock = Lock()
-generator = get_generator("7B", "tokenizer.model", MAX_CONTEXT)
+generator, max_context = load_generator()
 
 app = Flask(__name__)
 sse_publisher = MessageAnnouncer()
@@ -53,7 +52,7 @@ def generate():
     except (KeyError, ValueError) as e:
         return { "error": repr(e) }, 400
 
-    if len(prompt) > MAX_CONTEXT:
+    if len(prompt) > max_context:
         return { "error": "Prompt is too long" }, 400
 
     acquired = generation_lock.acquire(blocking=False)
