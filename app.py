@@ -1,6 +1,7 @@
 from logging.config import dictConfig
 from threading import Lock
 import time
+import os
 from flask import Flask, request, Response, render_template
 
 from generator_factory import get_generator
@@ -21,6 +22,18 @@ dictConfig({
         'handlers': ['wsgi']
     }
 })
+
+def load_generator():
+    MAX_CONTEXT = 2048
+    def env_var_with_default(name: str, default: str) -> str:
+        try:
+            return os.environ[name]
+        except ValueError:
+            return default
+
+    checkpoint_dir = env_var_with_default("CHECKPOINT_DIR", "7B")
+    tokenizer_path = env_var_with_default("TOKENIZER_PATH", "tokenizer.model")
+    return get_generator(checkpoint_dir, tokenizer_path, MAX_CONTEXT)
 
 MAX_CONTEXT = 2048
 generation_lock = Lock()

@@ -1,48 +1,31 @@
-# LLaMA 
+# LLaMA-7B Frontend
 
-This repository is intended as a minimal, hackable and readable example to load [LLaMA](https://ai.facebook.com/blog/large-language-model-llama-meta-ai/) ([arXiv](https://arxiv.org/abs/2302.13971v1)) models and run inference.
-In order to download the checkpoints and tokenizer, fill this [google form](https://forms.gle/jk851eBVbX1m5TAv5)
+This is a **non-production ready** frontend for [LLaMA-7B](https://github.com/facebookresearch/llama). Do not expose this to the internet unless you are prepared to have random scanners instantly take control of your machine.
 
-### Setup
-In a conda env with pytorch / cuda available, run
-```
-pip install -r requirements.txt
-```
-Then in this repository
-```
-pip install -e .
-```
+![Demonstration video](demo.gif)
 
-### Download
-Once your request is approved, you will receive links to download the tokenizer and model files.
-Edit the `download.sh` script with the signed url provided in the email to download the model weights and tokenizer.
+## Requirements
 
-### Inference
+- Linux (not sure if this works on Windows)
+- Python 3.10+, pip
+- NVidia (?) GPU with 16GB+ of VRAM
 
-`flask run` will launch a web UI. Use `--host 0.0.0.0` to make it available to other devices on your network.
+## Setup
 
-The provided `example.py` can be run on a single or multi-gpu node with `torchrun` and will output completions for two pre-defined prompts. Using `TARGET_FOLDER` as defined in `download.sh`:
-```
-torchrun --nproc_per_node MP example.py --ckpt_dir $TARGET_FOLDER/model_size --tokenizer_path $TARGET_FOLDER/tokenizer.model
-```
+1. Clone this repo.
+2. `pip install -r requirements.txt`
+3. `pip install -e .`
+4. Copy `7B` checkpoints folder and `tokenizer.model` to repository root.
 
-Different models require different MP values:
+## Running
 
-|  Model | MP |
-|--------|----|
-| 7B     | 1  |
-| 13B    | 2  |
-| 33B    | 4  |
-| 65B    | 8  |
+`flask run` will start the app server on `127.0.0.1:5000`. Enable access from other devices on the network with `flask run --host 0.0.0.0`.
 
-### FAQ
-- [1. The download.sh script doesn't work on default bash in MacOS X](FAQ.md#1)
-- [2. Generations are bad!](FAQ.md#2)
-- [3. CUDA Out of memory errors](FAQ.md#3)
-- [4. Other languages](FAQ.md#4)
+## Configuration
 
-### Model Card
-See [MODEL_CARD.md](MODEL_CARD.md)
+The checkpoint folder and tokenizer file can be configured with environment variables.
 
-### License
-See the [LICENSE](LICENSE) file.
+| Variable     | Description     | Default value |
+|--------------|-----------|------------|
+| CHECKPOINT_DIR | Path of 7B checkpoint folder      | `7B`        |
+| TOKENIZER_PATH      | Path of tokenizer model  | `tokenizer.model`       |

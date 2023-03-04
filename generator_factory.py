@@ -51,7 +51,7 @@ def load(ckpt_dir: str, tokenizer_path: str, local_rank: int, world_size: int, m
     print(f"Loaded in {time.time() - start_time:.2f} seconds")
     return generator
 
-def get_generator(ckpt_dir: str, tokenizer_path: str, max_seq_len: int):
+def get_generator(ckpt_dir: str, tokenizer_path: str, max_seq_len: int) -> LLaMA:
     import os
     # I have no idea how torch.distributed works, but running a task with > 1 worker
     # from flask hangs the app, so 7B only
