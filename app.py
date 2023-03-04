@@ -1,4 +1,5 @@
 from logging.config import dictConfig
+from threading import Lock
 import time
 from flask import Flask, request, Response, render_template
 
@@ -22,6 +23,7 @@ dictConfig({
 })
 
 MAX_CONTEXT = 2048
+generation_lock = Lock()
 generator = get_generator("7B", "tokenizer.model", MAX_CONTEXT)
 
 app = Flask(__name__)
@@ -41,20 +43,28 @@ def generate():
     if len(prompt) > MAX_CONTEXT:
         return { "error": "Prompt is too long" }, 400
 
-    app.logger.info("got generation request: %s", payload)
-    def on_gen(decoded: str):
-        sse_publisher.announce(decoded, "partial")
+    acquired = generation_lock.acquire(blocking=False)
+    if not acquired:
+        app.logger.info("ignoring concurrent request %s", payload)
+        return { "error": "Another client is still generating text. Try refreshing the page to see it." }, 400
 
-    t0 = time.time()
-    result = generator.generate([prompt],
-        max_gen_len=max_gen_len,
-        temperature=temp,
-        top_p=top_p,
-        gen_callback=on_gen)[0]
+    try:
+        app.logger.info("got generation request: %s", payload)
+        def on_gen(decoded: str):
+            sse_publisher.announce(decoded, "partial")
 
-    sse_publisher.announce(result, "complete")
-    app.logger.info("finished generation request (%.2fs): %s", time.time() - t0, payload)
-    return f'{result}'
+        t0 = time.time()
+        result = generator.generate([prompt],
+            max_gen_len=max_gen_len,
+            temperature=temp,
+            top_p=top_p,
+            gen_callback=on_gen)[0]
+
+        sse_publisher.announce(result, "complete")
+        app.logger.info("finished generation request (%.2fs): %s", time.time() - t0, payload)
+        return f'{result}'
+    finally:
+        generation_lock.release()
 
 # https://maxhalford.github.io/blog/flask-sse-no-deps/
 @app.route('/listen', methods=['GET'])
