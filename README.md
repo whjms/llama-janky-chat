@@ -1,6 +1,6 @@
-# LLaMA-7B Frontend
+# LLaMA Frontend
 
-This is a **non-production ready** frontend for [LLaMA-7B](https://github.com/facebookresearch/llama). Do not expose this to the internet unless you are prepared to have random scanners instantly take control of your machine.
+This is a **non-production ready** frontend for [LLaMA](https://github.com/facebookresearch/llama). Do not expose this to the internet unless you are prepared to have random scanners instantly take control of your machine.
 
 ![Demonstration video](demo.gif)
 
