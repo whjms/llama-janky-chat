@@ -2,6 +2,7 @@ if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.querySelector("html").setAttribute("data-bs-theme", "dark");
 }
 
+const buttonCancel = document.querySelector("#cancel");
 const buttonGenerate = document.querySelector("#generate");
 const buttonRecycle = document.querySelector("#recycle");
 const spinner = document.querySelector(".spinner-border");
@@ -11,9 +12,12 @@ const alert = document.querySelector(".alert");
 
 function disableInputs(disabled) {
     if (disabled) {
+        // enable cancel button while generating
+        buttonCancel.removeAttribute("disabled");
         spinner.classList.remove("d-none");
         buttonGenerate.setAttribute("disabled", "");
     } else {
+        buttonCancel.setAttribute("disabled", "");
         spinner.classList.add("d-none");
         buttonGenerate.removeAttribute("disabled");
     }
@@ -73,6 +77,10 @@ buttonGenerate.addEventListener("click", async () => {
     }
 });
 
+buttonCancel.addEventListener("click", () => {
+    fetch("/cancel", { "method": "POST" });
+});
+
 buttonRecycle.addEventListener("click", () => {
     promptInput.value = generatedContainer.innerText;
 });
@@ -84,6 +92,6 @@ eventSource.addEventListener("partial", (event) => {
     renderGeneratedText(JSON.parse(event.data));
 });
 
-eventSource.addEventListener("complete", (event) => {
+eventSource.addEventListener("complete", () => {
     disableInputs(false);
 });

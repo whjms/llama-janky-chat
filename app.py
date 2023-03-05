@@ -24,6 +24,9 @@ dictConfig({
     }
 })
 
+class GenerationCancelled(Exception):
+    pass
+
 def load_generator():
     def env_var_with_default(name: str, default: str) -> str:
         try:
@@ -36,6 +39,7 @@ def load_generator():
     max_context = int(env_var_with_default("CONTEXT_LEN", 768))
     return get_generator(checkpoint_dir, tokenizer_path, max_context), max_context
 
+signal_generation_cancelled = Lock()
 generation_lock = Lock()
 generator, max_context = load_generator()
 
@@ -62,6 +66,9 @@ def generate():
         return { "error": "Another client is still generating text. Try refreshing the page to see it." }, 400
 
     try:
+        if signal_generation_cancelled.locked():
+            signal_generation_cancelled.release()
+
         app.logger.info("got generation request: %s", payload)
         def on_gen(decoded: str):
             msg = {
@@ -70,12 +77,21 @@ def generate():
             }
             sse_publisher.announce(json.dumps(msg), "partial")
 
+            if signal_generation_cancelled.locked():
+                raise GenerationCancelled()
+
         t0 = time.time()
-        result = generator.generate([prompt],
-            max_gen_len=max_gen_len,
-            temperature=temp,
-            top_p=top_p,
-            gen_callback=on_gen)[0]
+        try:
+            result = generator.generate([prompt],
+                max_gen_len=max_gen_len,
+                temperature=temp,
+                top_p=top_p,
+                gen_callback=on_gen)[0]
+        except GenerationCancelled:
+            app.logger.info("cancelled generation request (%.2fs): %s", time.time() - t0, payload)
+            sse_publisher.announce("<cancelled>", "complete")
+            signal_generation_cancelled.release()
+            return '{"error": "Generation was cancelled" }', 400
 
         msg = {
             "prompt": prompt,
@@ -97,6 +113,11 @@ def listen():
             yield msg
 
     return Response(stream(), mimetype='text/event-stream')
+
+@app.route("/cancel", methods=["POST"])
+def cancel():
+    signal_generation_cancelled.acquire(False)
+    return "", 200
 
 @app.route("/")
 def index():
