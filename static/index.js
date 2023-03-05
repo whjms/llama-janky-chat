@@ -2,7 +2,8 @@ if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.querySelector("html").setAttribute("data-bs-theme", "dark");
 }
 
-const buttonGenerate = document.querySelector("button");
+const buttonGenerate = document.querySelector("#generate");
+const buttonRecycle = document.querySelector("#recycle");
 const spinner = document.querySelector(".spinner-border");
 const promptInput = document.querySelector("textarea");
 const generatedContainer = document.querySelector("#generated");
@@ -70,6 +71,10 @@ buttonGenerate.addEventListener("click", async () => {
     } finally {
         disableInputs(false);
     }
+});
+
+buttonRecycle.addEventListener("click", () => {
+    promptInput.value = generatedContainer.innerText;
 });
 
 const eventSource = new EventSource("/listen");
