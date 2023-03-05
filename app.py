@@ -1,6 +1,7 @@
 from logging.config import dictConfig
 from threading import Lock
 import time
+import json
 import os
 from flask import Flask, request, Response, render_template
 
@@ -63,7 +64,11 @@ def generate():
     try:
         app.logger.info("got generation request: %s", payload)
         def on_gen(decoded: str):
-            sse_publisher.announce(decoded, "partial")
+            msg = {
+                "prompt": prompt,
+                "generated": decoded,
+            }
+            sse_publisher.announce(json.dumps(msg), "partial")
 
         t0 = time.time()
         result = generator.generate([prompt],
@@ -72,9 +77,13 @@ def generate():
             top_p=top_p,
             gen_callback=on_gen)[0]
 
-        sse_publisher.announce(result, "complete")
+        msg = {
+            "prompt": prompt,
+            "generated": result,
+        }
+        sse_publisher.announce(json.dumps(msg), "complete")
         app.logger.info("finished generation request (%.2fs): %s", time.time() - t0, payload)
-        return f'{result}'
+        return msg
     finally:
         generation_lock.release()
 
