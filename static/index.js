@@ -12,11 +12,9 @@ function disableInputs(disabled) {
     if (disabled) {
         spinner.classList.remove("d-none");
         buttonGenerate.setAttribute("disabled", "");
-        promptInput.setAttribute("disabled", "");
     } else {
         spinner.classList.add("d-none");
         buttonGenerate.removeAttribute("disabled");
-        promptInput.removeAttribute("disabled");
     }
 }
 

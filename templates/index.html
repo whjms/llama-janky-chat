@@ -8,63 +8,76 @@
 </head>
 
 <body>
-    <div class="container p-3">
-        <h1 class="mb-3">LLaMA 7B</h1>
-        <label class="form-label" for="prompt">Enter a prompt:</label>
-
-        <div class="input-group mb-2">
-            <button type="button" class="btn btn-primary input-group-text">
-                <span class="spinner-border spinner-border-sm d-none" role="status"
-                    aria-hidden="true"></span>
-                Generate
-            </button>
-            <textarea class="form-control" id="prompt" rows="5"></textarea>
+    <div class="container">
+        <div class="row">
+            <h1 class="mb-3 text-center">LLaMA 7B</h1>
         </div>
+        <div class="row">
+            <div class="col-lg-5">
+                <label class="form-label" for="prompt">Enter a prompt:</label>
 
-        <div class="accordion mb-4">
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#extra-options">Extra Options</button>
-                </h2>
-            </div>
+                <div class="input-group mb-2">
+                    <button type="button" class="btn btn-primary input-group-text">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        Go
+                    </button>
+                    <textarea class="form-control" id="prompt" rows="5"></textarea>
+                </div>
 
-            <div id="extra-options" class="accordion-collapse collapse hide">
-                <div class="input-group accordion-body">
-                    <div class="container mb-2 p-0">
-                        <label for="max-gen-tokens" class="form-label">Number of tokens to generate</label>
-                        <input type="number" class="form-control" id="max-gen-tokens" value="200" min="1" max="2048">
-                        <div class="form-text">Number of additional tokens to generate. <a
-                                href="https://github.com/google/sentencepiece">Each token is approximately 1
-                                word.</a></div>
+                <div class="accordion mb-4">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#extra-options">Extra Options</button>
+                        </h2>
                     </div>
 
-                    <div class="container mb-2 p-0">
-                        <label for="temperature" class="form-label">Temperature</label>
-                        <input type="number" class="form-control" id="temperature" value="0.8" min="0" max="1"
-                            step="0.1">
-                        <div class="form-text">&lsquo;Creativity&rsquo; value. Higher <a
-                                href="https://huggingface.co/blog/how-to-generate#sampling">temperatures</a> make text
-                            more random at the expense of coherence.</div>
-                    </div>
+                    <div id="extra-options" class="accordion-collapse collapse hide">
+                        <div class="input-group accordion-body">
+                            <div class="container mb-2 p-0">
+                                <label for="max-gen-tokens" class="form-label">Number of tokens to generate</label>
+                                <input type="number" class="form-control" id="max-gen-tokens" value="200" min="1"
+                                    max="2048">
+                                <div class="form-text">Number of additional tokens to generate. <a
+                                        href="https://github.com/google/sentencepiece">Each token is approximately 1
+                                        word.</a></div>
+                            </div>
 
-                    <div class="container p-0">
-                        <label for="top-p" class="form-label">Top-P</label>
-                        <input type="number" class="form-control" id="top-p" value="0.95" max="1" min="0" step="0.1">
-                        <div class="form-text"><a
-                                href="https://huggingface.co/blog/how-to-generate#top-p-nucleus-sampling">Additional
-                                sampling</a> performed after temperature modification. Lower values make sampling more
-                            deterministic.</div>
+                            <div class="container mb-2 p-0">
+                                <label for="temperature" class="form-label">Temperature</label>
+                                <input type="number" class="form-control" id="temperature" value="0.8" min="0" max="1"
+                                    step="0.1">
+                                <div class="form-text">&lsquo;Creativity&rsquo; value. Higher <a
+                                        href="https://huggingface.co/blog/how-to-generate#sampling">temperatures</a>
+                                    make
+                                    text
+                                    more random at the expense of coherence.</div>
+                            </div>
+
+                            <div class="container p-0">
+                                <label for="top-p" class="form-label">Top-P</label>
+                                <input type="number" class="form-control" id="top-p" value="0.95" max="1" min="0"
+                                    step="0.1">
+                                <div class="form-text"><a
+                                        href="https://huggingface.co/blog/how-to-generate#top-p-nucleus-sampling">Additional
+                                        sampling</a> performed after temperature modification. Lower values make
+                                    sampling
+                                    more
+                                    deterministic.</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <h2>Generated text</h2>
-        <div class="alert alert-warning d-none" role="alert">
+            <div class="col">
+                <h2>Generated text</h2>
+                <div class="alert alert-warning d-none" role="alert">
+                </div>
+                <pre id="generated" class="border border-primary-subtle rounded p-3"
+                    style="font-family: sans-serif; line-height: 1.25; white-space: pre-wrap;"></pre>
+            </div>
         </div>
-        <pre class="border border-primary-subtle rounded p-3"
-            style="font-family: sans-serif; line-height: 1.25; white-space: pre-wrap;"></pre>
     </div>
 
     <script src="/static/bootstrap.bundle.min.js"></script>
